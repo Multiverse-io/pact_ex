@@ -1,0 +1,15 @@
+[package]
+name = "pact_ex"
+version = "0.1.0"
+authors = []
+edition = "2021"
+
+[lib]
+name = "pact_ex"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pact_ffi = "0.4.22"
+pact_models = "1.2.2"
+rustler = "0.34"

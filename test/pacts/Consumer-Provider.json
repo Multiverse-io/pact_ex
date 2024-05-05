@@ -1,0 +1,121 @@
+{
+  "consumer": {
+    "name": "Consumer"
+  },
+  "interactions": [
+    {
+      "contents": {
+        "content": {
+          "name": "John"
+        },
+        "contentType": "application/json",
+        "encoded": false
+      },
+      "description": "a payload containing info about the user",
+      "matchingRules": {
+        "body": {
+          "$.name": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "metadata": {}
+      },
+      "metadata": {
+        "contentType": "application/json",
+        "routing_key": "user.added"
+      },
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a user named John"
+        }
+      ],
+      "type": "Asynchronous/Messages"
+    },
+    {
+      "description": "a request",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a user named John"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "header": {},
+          "query": {
+            "name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/",
+        "query": {
+          "name": [
+            "John"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "name": "John"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.22",
+      "mockserver": "1.2.9",
+      "models": "1.2.2"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "Provider"
+  }
+}
