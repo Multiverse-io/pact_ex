@@ -5,7 +5,20 @@ defmodule PactEx do
 
   See [`PactEx.ConsumerTest`] and [`PactEx.ProviderTest`] for examples.
   """
-  use Rustler, otp_app: :pact_ex, crate: "pact_ex"
+
+  version = Mix.Project.config()[:version]
+
+  use RustlerPrecompiled,
+    otp_app: :pact_ex,
+    crate: "pact_ex",
+    base_url: "https://github.com/Multiverse-io/pact_ex/releases/download/v#{version}",
+    version: version,
+    force_build: System.get_env("RUSTLER_PRECOMPILATION_PACT_EX_BUILD") in ["1", "true"],
+    targets: [
+      "aarch64-apple-darwin",
+      "aarch64-unknown-linux-musl",
+      "x86_64-unknown-linux-musl"
+    ]
 
   @type pact :: reference()
   @type interaction :: reference()

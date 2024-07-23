@@ -8,7 +8,22 @@ defmodule PactEx.MixProject do
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      package: package(),
       elixirc_paths: elixirc_paths(Mix.env())
+    ]
+  end
+
+  defp package do
+    [
+      files: [
+        "lib",
+        "native",
+        "checksum-*.exs",
+        "mix.exs"
+      ],
+      description: "",
+      licenses: ["UNLICENSED"],
+      links: %{}
     ]
   end
 
@@ -29,7 +44,8 @@ defmodule PactEx.MixProject do
       {:tesla, "~> 1.11"},
       {:hackney, "~> 1.20"},
       {:jason, ">= 1.0.0"},
-      {:rustler, "~> 0.34"},
+      {:rustler_precompiled, "~> 0.4"},
+      {:rustler, ">= 0.0.0", optional: true},
       {:bandit, "~> 1.5.5", only: [:dev, :test]},
       {:plug, "~> 1.16.1", only: [:dev, :test]}
     ]
