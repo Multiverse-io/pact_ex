@@ -1,10 +1,12 @@
 defmodule PactEx.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :pact_ex,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -47,7 +49,8 @@ defmodule PactEx.MixProject do
       {:rustler_precompiled, "~> 0.4"},
       {:rustler, ">= 0.0.0", optional: true},
       {:bandit, "~> 1.5.5", only: [:dev, :test]},
-      {:plug, "~> 1.16.1", only: [:dev, :test]}
+      {:plug, "~> 1.16.1", only: [:dev, :test]},
+      {:plug_cowboy, "~> 2.0", only: [:dev, :test]}
     ]
   end
 end

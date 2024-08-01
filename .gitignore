@@ -28,3 +28,4 @@ pact_ex-*.tar
 .DS_Store
 
 native/pact_ex/$persist_dir
+priv/native

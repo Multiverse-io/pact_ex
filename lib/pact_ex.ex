@@ -13,7 +13,9 @@ defmodule PactEx do
     crate: "pact_ex",
     base_url: "https://github.com/Multiverse-io/pact_ex/releases/download/v#{version}",
     version: version,
-    force_build: System.get_env("RUSTLER_PRECOMPILATION_PACT_EX_BUILD") in ["1", "true"],
+    force_build:
+      System.get_env("RUSTLER_PRECOMPILATION_PACT_EX_BUILD") in ["1", "true"] ||
+        System.get_env("MIX_ENV") == "test",
     targets: [
       "aarch64-apple-darwin",
       "aarch64-unknown-linux-musl",
@@ -188,10 +190,17 @@ defmodule PactEx do
           String.t(),
           String.t(),
           String.t(),
+          integer()
+        ) :: verifier()
+  @spec verifier_set_provider_info(
+          verifier(),
+          String.t(),
+          String.t(),
+          String.t(),
           integer(),
           String.t()
         ) :: verifier()
-  def verifier_set_provider_info(_verifier, _name, _scheme, _host, _port, _path),
+  def verifier_set_provider_info(_verifier, _name, _scheme, _host, _port, _path \\ ""),
     do: :erlang.nif_error(:nif_not_loaded)
 
   @doc "See https://docs.rs/pact_ffi/0.4.22/pact_ffi/verifier/fn.pactffi_verifier_set_provider_state.html"
@@ -200,9 +209,11 @@ defmodule PactEx do
     do: :erlang.nif_error(:nif_not_loaded)
 
   @doc "See https://docs.rs/pact_ffi/0.4.22/pact_ffi/verifier/fn.pactffi_verifier_add_provider_transport.html"
+  @spec verifier_add_provider_transport(verifier(), String.t(), integer(), String.t()) ::
+          verifier()
   @spec verifier_add_provider_transport(verifier(), String.t(), integer(), String.t(), String.t()) ::
           verifier()
-  def verifier_add_provider_transport(_verifier, _protocol, _port, _path, _scheme),
+  def verifier_add_provider_transport(_verifier, _protocol, _port, _path, _scheme \\ ""),
     do: :erlang.nif_error(:nif_not_loaded)
 
   @doc "See https://docs.rs/pact_ffi/0.4.22/pact_ffi/verifier/fn.pactffi_verifier_add_directory_source.html"

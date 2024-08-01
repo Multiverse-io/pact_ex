@@ -1,5 +1,8 @@
 use core::panic;
-use std::ffi::{CStr, CString};
+use std::{
+    ffi::{CStr, CString},
+    sync::atomic::{AtomicPtr, Ordering},
+};
 
 use pact_ffi::{
     mock_server::{
@@ -51,12 +54,9 @@ struct MessageResource(MessageHandle);
 #[rustler::resource_impl]
 impl Resource for MessageResource {}
 
-struct VerifierResource(*mut VerifierHandle);
+struct VerifierResource(AtomicPtr<VerifierHandle>);
 #[rustler::resource_impl]
 impl Resource for VerifierResource {}
-
-unsafe impl Send for VerifierResource {}
-unsafe impl Sync for VerifierResource {}
 
 #[rustler::nif]
 fn new_pact(consumer: String, provider: String) -> ResourceArc<PactResource> {
@@ -360,7 +360,7 @@ fn verifier_new_for_application(name: String, version: String) -> ResourceArc<Ve
     let name = CString::new(name).expect("invalid name");
     let version = CString::new(version).expect("invalid version");
     let verifier = pactffi_verifier_new_for_application(name.as_ptr(), version.as_ptr());
-    ResourceArc::new(VerifierResource(verifier))
+    ResourceArc::new(VerifierResource(AtomicPtr::new(verifier)))
 }
 
 #[rustler::nif]
@@ -385,7 +385,7 @@ fn verifier_set_publish_options(
 
     let provider_branch = CString::new(provider_branch).expect("invalid provider branch");
     let result = pactffi_verifier_set_publish_options(
-        verifier.0,
+        verifier.0.load(Ordering::SeqCst),
         provider_version.as_ptr(),
         build_url.as_ptr(),
         provider_tag_ptrs.as_ptr(),
@@ -412,7 +412,7 @@ fn verifier_broker_source(
     let password = CString::new(password).expect("invalid password");
     let token = CString::new(token).expect("invalid token");
     pactffi_verifier_broker_source(
-        verifier.0,
+        verifier.0.load(Ordering::SeqCst),
         url.as_ptr(),
         username.as_ptr(),
         password.as_ptr(),
@@ -435,7 +435,7 @@ fn verifier_set_provider_info(
     let host = CString::new(host).expect("invalid host");
     let path = CString::new(path).expect("invalid path");
     pactffi_verifier_set_provider_info(
-        verifier.0,
+        verifier.0.load(Ordering::SeqCst),
         name.as_ptr(),
         scheme.as_ptr(),
         host.as_ptr(),
@@ -454,7 +454,7 @@ fn verifier_set_provider_state(
 ) -> ResourceArc<VerifierResource> {
     let url = CString::new(url).expect("invalid url");
     pactffi_verifier_set_provider_state(
-        verifier.0,
+        verifier.0.load(Ordering::SeqCst),
         url.as_ptr(),
         if teardown { 1 } else { 0 },
         if body { 1 } else { 0 },
@@ -474,7 +474,7 @@ fn verifier_add_provider_transport(
     let path = CString::new(path).expect("invalid path");
     let scheme = CString::new(scheme).expect("invalid scheme");
     pactffi_verifier_add_provider_transport(
-        verifier.0,
+        verifier.0.load(Ordering::SeqCst),
         protocol.as_ptr(),
         port,
         path.as_ptr(),
@@ -489,7 +489,7 @@ fn verifier_add_directory_source(
     directory: String,
 ) -> ResourceArc<VerifierResource> {
     let directory = CString::new(directory).expect("invalid directory");
-    pactffi_verifier_add_directory_source(verifier.0, directory.as_ptr());
+    pactffi_verifier_add_directory_source(verifier.0.load(Ordering::SeqCst), directory.as_ptr());
     verifier
 }
 
@@ -501,18 +501,22 @@ fn verifier_add_custom_header(
 ) -> ResourceArc<VerifierResource> {
     let name = CString::new(name).expect("invalid name");
     let value = CString::new(value).expect("invalid value");
-    pactffi_verifier_add_custom_header(verifier.0, name.as_ptr(), value.as_ptr());
+    pactffi_verifier_add_custom_header(
+        verifier.0.load(Ordering::SeqCst),
+        name.as_ptr(),
+        value.as_ptr(),
+    );
     verifier
 }
 
 #[rustler::nif]
 fn verifier_execute(verifier: ResourceArc<VerifierResource>) -> bool {
-    pactffi_verifier_execute(verifier.0) == 0
+    pactffi_verifier_execute(verifier.0.load(Ordering::SeqCst)) == 0
 }
 
 #[rustler::nif]
 fn verifier_output(verifier: ResourceArc<VerifierResource>, strip_ansi: u8) -> String {
-    let output = pactffi_verifier_output(verifier.0, strip_ansi);
+    let output = pactffi_verifier_output(verifier.0.load(Ordering::SeqCst), strip_ansi);
     unsafe { CStr::from_ptr(output) }
         .to_string_lossy()
         .into_owned()
@@ -520,7 +524,7 @@ fn verifier_output(verifier: ResourceArc<VerifierResource>, strip_ansi: u8) -> S
 
 #[rustler::nif]
 fn verifier_shutdown(verifier: ResourceArc<VerifierResource>) {
-    pactffi_verifier_shutdown(verifier.0);
+    pactffi_verifier_shutdown(verifier.0.load(Ordering::SeqCst));
 }
 
 #[rustler::nif]

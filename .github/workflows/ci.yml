@@ -1,0 +1,62 @@
+name: Elixir CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+env:
+  RUSTLER_PRECOMPILATION_PACT_EX_BUILD: true
+  MIX_ENV: test
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - otp_version: "26.2.5"
+            elixir_version: 1.17
+
+    runs-on: ubuntu-latest
+    name: test
+    services:
+      pact-broker:
+        image: pactfoundation/pact-broker:latest
+        ports:
+          - 9292:9292
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            _build/test/lib/pact_ex/native/pact_ex
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: test-native-${{ runner.os }}-${{ hashFiles('native/**/Cargo.lock') }}
+          restore-keys: |
+            test-native-${{ runner.os }}
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp_version }}
+          elixir-version: ${{ matrix.elixir_version }}
+
+      - run: mix deps.get
+      - run: mix deps.compile
+      - name: Run tests
+        run: mix test --warnings-as-errors --include requires_broker
+
+  format:
+    runs-on: ubuntu-latest
+    name: mix format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "26.2.1"
+          elixir-version: 1.16
+      - run: mix format --check-formatted
