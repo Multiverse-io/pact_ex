@@ -49,8 +49,7 @@ defmodule PactEx.MixProject do
       {:rustler_precompiled, "~> 0.4"},
       {:rustler, ">= 0.0.0", optional: true},
       {:bandit, "~> 1.5.5", only: [:dev, :test]},
-      {:plug, "~> 1.16.1", only: [:dev, :test]},
-      {:plug_cowboy, "~> 2.0", only: [:dev, :test]}
+      {:plug, "~> 1.16.1", only: [:dev, :test]}
     ]
   end
 end

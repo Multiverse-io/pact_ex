@@ -8,6 +8,7 @@ on:
 
 env:
   RUSTLER_PRECOMPILATION_PACT_EX_BUILD: true
+  RUSTLER_PACT_EX_MODE: debug
   MIX_ENV: test
 
 jobs:
@@ -18,11 +19,22 @@ jobs:
           - otp_version: "26.2.5"
             elixir_version: 1.17
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: test
     services:
+      postgres:
+        image: postgres
+        volumes:
+          - postgres-volume:/var/lib/postgresql/data
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
       pact-broker:
         image: pactfoundation/pact-broker:latest
+        env:
+          PACT_BROKER_PORT: '9292'
+          PACT_BROKER_DATABASE_URL: "postgres://postgres:password@postgres/postgres"
         ports:
           - 9292:9292
     steps:
@@ -51,7 +63,7 @@ jobs:
         run: mix test --warnings-as-errors --include requires_broker
 
   format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: mix format
     steps:
       - uses: actions/checkout@v4

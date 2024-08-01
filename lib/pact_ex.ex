@@ -13,6 +13,7 @@ defmodule PactEx do
     crate: "pact_ex",
     base_url: "https://github.com/Multiverse-io/pact_ex/releases/download/v#{version}",
     version: version,
+    mode: System.get_env("RUSTLER_PACT_EX_MODE", "release") |> String.to_existing_atom(),
     force_build:
       System.get_env("RUSTLER_PRECOMPILATION_PACT_EX_BUILD") in ["1", "true"] ||
         System.get_env("MIX_ENV") == "test",
