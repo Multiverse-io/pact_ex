@@ -12,9 +12,10 @@ defmodule PactEx.ProviderTest do
       {:ok, {_address, port}} = ThousandIsland.listener_info(pid)
 
       # Ensure the server is up
-      assert {:ok, _} = Tesla.get("http://localhost:#{port}")
-      assert {:ok, _} = Tesla.post("http://localhost:#{port}/message", "{}")
+      assert {:ok, _} = Tesla.get("http://localhost:#{port}") |> IO.inspect()
+      assert {:ok, _} = Tesla.post("http://localhost:#{port}/message", "{}") |> IO.inspect()
 
+      init_with_log_level("trace")
       # Verify pacts against the mock provider
       verifier =
         verifier_new_for_application("tests", "1.0.0")
