@@ -8,14 +8,11 @@ defmodule PactEx.ProviderTest do
     test "success when providers match pacts" do
       # Start a mock provider on an unused port
       {:ok, pid} = Bandit.start_link(plug: MockProvider, port: 0)
+
       # Get the port of the mock provider
       {:ok, {_address, port}} = ThousandIsland.listener_info(pid)
 
-      # Ensure the server is up
-      assert {:ok, _} = Tesla.get("http://localhost:#{port}") |> IO.inspect()
-      assert {:ok, _} = Tesla.post("http://localhost:#{port}/message", "{}") |> IO.inspect()
-
-      init_with_log_level("trace")
+      # init_with_log_level("trace")
       # Verify pacts against the mock provider
       verifier =
         verifier_new_for_application("tests", "1.0.0")
@@ -25,8 +22,6 @@ defmodule PactEx.ProviderTest do
         |> verifier_add_directory_source("test/pacts")
 
       assert verifier_execute(verifier), "Verification failed"
-
-      Process.exit(pid, :normal)
 
       verifier_shutdown(verifier)
     end

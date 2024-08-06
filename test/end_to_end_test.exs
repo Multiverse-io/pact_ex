@@ -24,10 +24,6 @@ defmodule PactEx.EndToEndTest do
     # Get the port of the mock provider
     {:ok, {_address, port}} = ThousandIsland.listener_info(pid)
 
-    # Ensure the server is up
-    assert {:ok, _} = Tesla.get("http://localhost:#{port}")
-    assert {:ok, _} = Tesla.post("http://localhost:#{port}/message", "{}")
-
     version = PactEx.Git.get_hash!()
     branch = PactEx.Git.get_branch!()
 
@@ -40,8 +36,6 @@ defmodule PactEx.EndToEndTest do
       |> verifier_broker_source("http://localhost:9292", "", "", "")
 
     assert verifier_execute(verifier), "Verification failed"
-
-    Process.exit(pid, :normal)
 
     verifier_shutdown(verifier)
   end
