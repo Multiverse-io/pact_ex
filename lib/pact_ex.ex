@@ -234,6 +234,10 @@ defmodule PactEx do
   @spec verifier_output(verifier(), integer()) :: String.t()
   def verifier_output(_verifier, _strip_ansi \\ 0), do: :erlang.nif_error(:nif_not_loaded)
 
+  @doc "See https://docs.rs/pact_ffi/0.4.22/pact_ffi/verifier/fn.pactffi_verifier_json.html"
+  @spec verifier_json(verifier()) :: String.t()
+  def verifier_json(_verifier), do: :erlang.nif_error(:nif_not_loaded)
+
   @doc "See https://docs.rs/pact_ffi/0.4.22/pact_ffi/verifier/fn.pactffi_verifier_shutdown.html"
   @spec verifier_shutdown(verifier()) :: term()
   def verifier_shutdown(_verifier), do: :erlang.nif_error(:nif_not_loaded)

@@ -22,7 +22,7 @@ use pact_ffi::{
     verifier::{
         handle::VerifierHandle, pactffi_verifier_add_custom_header,
         pactffi_verifier_add_directory_source, pactffi_verifier_add_provider_transport,
-        pactffi_verifier_broker_source, pactffi_verifier_execute,
+        pactffi_verifier_broker_source, pactffi_verifier_execute, pactffi_verifier_json,
         pactffi_verifier_new_for_application, pactffi_verifier_output,
         pactffi_verifier_set_provider_info, pactffi_verifier_set_provider_state,
         pactffi_verifier_set_publish_options, pactffi_verifier_shutdown,
@@ -521,6 +521,14 @@ fn verifier_execute(verifier: ResourceArc<VerifierResource>) -> bool {
 fn verifier_output(verifier: ResourceArc<VerifierResource>, strip_ansi: u8) -> String {
     let output = pactffi_verifier_output(verifier.0.load(Ordering::SeqCst), strip_ansi);
     unsafe { CStr::from_ptr(output) }
+        .to_string_lossy()
+        .into_owned()
+}
+
+#[rustler::nif]
+fn verifier_json(verifier: ResourceArc<VerifierResource>) -> String {
+    let json = pactffi_verifier_json(verifier.0.load(Ordering::SeqCst));
+    unsafe { CStr::from_ptr(json) }
         .to_string_lossy()
         .into_owned()
 }
