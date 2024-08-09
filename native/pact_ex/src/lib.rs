@@ -1,8 +1,7 @@
 use core::panic;
-use std::{
-    ffi::{CStr, CString},
-    sync::atomic::{AtomicPtr, Ordering},
-};
+use rustler::{Atom, Resource, ResourceArc};
+use std::ffi::{CStr, CString};
+use std::sync::atomic::{AtomicPtr, Ordering};
 
 use pact_ffi::{
     mock_server::{
@@ -23,13 +22,12 @@ use pact_ffi::{
     verifier::{
         handle::VerifierHandle, pactffi_verifier_add_custom_header,
         pactffi_verifier_add_directory_source, pactffi_verifier_add_provider_transport,
-        pactffi_verifier_broker_source, pactffi_verifier_execute,
+        pactffi_verifier_broker_source, pactffi_verifier_execute, pactffi_verifier_json,
         pactffi_verifier_new_for_application, pactffi_verifier_output,
         pactffi_verifier_set_provider_info, pactffi_verifier_set_provider_state,
         pactffi_verifier_set_publish_options, pactffi_verifier_shutdown,
     },
 };
-use rustler::{Atom, Resource, ResourceArc};
 
 mod atoms {
     rustler::atoms! {
@@ -509,15 +507,28 @@ fn verifier_add_custom_header(
     verifier
 }
 
-#[rustler::nif]
+// The schedule argument must be set as this function can take some time
+// We also need to spawn a new thread as usage of task_local seems to cause issues
+// when called on the same thread
+#[rustler::nif(schedule = "DirtyCpu")]
 fn verifier_execute(verifier: ResourceArc<VerifierResource>) -> bool {
-    pactffi_verifier_execute(verifier.0.load(Ordering::SeqCst)) == 0
+    std::thread::spawn(move || pactffi_verifier_execute(verifier.0.load(Ordering::SeqCst)) == 0)
+        .join()
+        .expect("verifier thread failed to complete")
 }
 
 #[rustler::nif]
 fn verifier_output(verifier: ResourceArc<VerifierResource>, strip_ansi: u8) -> String {
     let output = pactffi_verifier_output(verifier.0.load(Ordering::SeqCst), strip_ansi);
     unsafe { CStr::from_ptr(output) }
+        .to_string_lossy()
+        .into_owned()
+}
+
+#[rustler::nif]
+fn verifier_json(verifier: ResourceArc<VerifierResource>) -> String {
+    let json = pactffi_verifier_json(verifier.0.load(Ordering::SeqCst));
+    unsafe { CStr::from_ptr(json) }
         .to_string_lossy()
         .into_owned()
 }
