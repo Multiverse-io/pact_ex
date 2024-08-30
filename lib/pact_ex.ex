@@ -13,7 +13,11 @@ defmodule PactEx do
     crate: "pact_ex",
     base_url: "https://github.com/Multiverse-io/pact_ex/releases/download/v#{version}",
     version: version,
-    mode: System.get_env("RUSTLER_PACT_EX_MODE", "release") |> String.to_existing_atom(),
+    mode:
+      (case System.get_env("RUSTLER_PACT_EX_MODE") do
+         "debug" -> :debug
+         _ -> :release
+       end),
     force_build: System.get_env("RUSTLER_PRECOMPILATION_PACT_EX_BUILD") in ["1", "true"],
     targets: [
       "aarch64-apple-darwin",
