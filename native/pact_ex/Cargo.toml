@@ -3,6 +3,7 @@ name = "pact_ex"
 version = "0.1.0"
 authors = []
 edition = "2021"
+license = "MIT"
 
 [lib]
 name = "pact_ex"
