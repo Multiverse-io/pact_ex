@@ -1,7 +1,7 @@
 defmodule PactEx.MixProject do
   use Mix.Project
 
-  @version "0.3.1"
+  @version "0.3.2"
 
   def project do
     [
@@ -46,7 +46,7 @@ defmodule PactEx.MixProject do
       {:tesla, "~> 1.11"},
       {:hackney, "~> 1.20"},
       {:jason, ">= 1.0.0"},
-      {:rustler_precompiled, "~> 0.4"},
+      {:rustler_precompiled, "~> 0.8"},
       {:rustler, ">= 0.0.0", optional: true},
       {:bandit, "~> 1.5.7", only: [:dev, :test]},
       {:plug, "~> 1.16.1", only: [:dev, :test]}

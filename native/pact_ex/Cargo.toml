@@ -11,6 +11,6 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pact_ffi = "0.4.22"
-pact_models = "1.2.2"
-rustler = "0.34"
+pact_ffi = "0.4.23"
+pact_models = "1.2.4"
+rustler = "0.35"
